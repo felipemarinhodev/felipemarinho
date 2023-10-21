@@ -1,8 +1,8 @@
-const fs = require("fs");
+import fs from "fs";
 const DB_FILE_PATH = "./core/db";
 console.log('[CRUD]');
 
-function create(content) {
+function create(content: string) {
   // salvar o content no sistema
   fs.writeFileSync(DB_FILE_PATH, content)
   return content;
@@ -10,4 +10,4 @@ function create(content) {
 
 
 // [SIMULATIONS]
-console.log(create("Hoje estou gravando a aula a2.1!"));
+console.log(create("Hoje estou gravando a aula a2.2!"));
