@@ -2,7 +2,6 @@ import fs from "fs";
 import { v4 as uuid} from "uuid";
 
 const DB_FILE_PATH = "./core/db";
-console.log('[CRUD]');
 
 interface Todo {
   id: string;
@@ -11,7 +10,7 @@ interface Todo {
   done: boolean;
 }
 
-function create(content: string) {
+function create(content: string): Todo {
   const todo: Todo = {
     id: uuid(),
     date: new Date().toISOString(),
@@ -25,8 +24,12 @@ function create(content: string) {
   ]
 
   // salvar o content no sistema
-  fs.writeFileSync(DB_FILE_PATH, JSON.stringify({todos}, null, 2))
-  return content;
+  saveOnDB(todos);
+  return todo;
+}
+
+function saveOnDB(todos: Todo[]) {
+  fs.writeFileSync(DB_FILE_PATH, JSON.stringify({ todos }, null, 2));
 }
 
 function read(): Array<Todo> {
@@ -38,6 +41,29 @@ function read(): Array<Todo> {
   return db.todos;
 }
 
+function update(id:string, partialTodo: Partial<Todo>) {
+  let updatedTodo;
+  const todos = read();
+  todos.forEach((currentTodo) => {
+    const isToUpdate = currentTodo.id === id;
+    if (isToUpdate) {
+      updatedTodo = Object.assign(currentTodo, partialTodo)
+    }
+  });
+  saveOnDB(todos);
+  if (!updatedTodo) {
+    throw new Error("Please, provide another ID!");
+  }
+  return updatedTodo
+}
+
+function updateContentById(id:string, content: string) {
+  return update(id, {content})
+}
+function updateDoneById(id:string, done: boolean) {
+  return update(id, {done})
+}
+
 function CLEAR_DB() {
   fs.writeFileSync(DB_FILE_PATH, "");
 }
@@ -46,6 +72,6 @@ function CLEAR_DB() {
 CLEAR_DB();
 create("Primeira TODO");
 create("Segunda TODO");
-console.log(read());
-
-
+const terceiraTodo = create("Segunda TODO");
+updateContentById(terceiraTodo.id, "Terceira Todo");
+updateDoneById(terceiraTodo.id, true);
