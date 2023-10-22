@@ -7,7 +7,7 @@ interface TodoControllerGetParams {
 async function get({ page }: TodoControllerGetParams) {
   return todoRespository.get({
     page: page || 1,
-    limit: 1,
+    limit: 5,
   });
 }
 

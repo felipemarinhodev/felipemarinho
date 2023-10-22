@@ -8,17 +8,21 @@ interface HomeTodo {
   content: string;
 }
 function HomePage() {
+  const [initialLoadComplete, setInitialLoadComplete] = useState(false);
   const [totalPages, setTotalPages] = useState(0);
   const [page, setPage] = useState(1);
   const [todos, setTodos] = useState<HomeTodo[]>([]);
 
   const hasMorePages = totalPages > page;
   useEffect(() => {
-    todoController.get({ page }).then(({ todos, pages }) => {
-      setTodos((oldTodos) => [...oldTodos, ...todos]);
-      setTotalPages(pages);
-    });
-  }, [page]);
+    setInitialLoadComplete(true);
+    if (!initialLoadComplete) {
+      todoController.get({ page }).then(({ todos, pages }) => {
+        setTodos(todos);
+        setTotalPages(pages);
+      });
+    }
+  }, []);
 
   return (
     <main>
@@ -87,7 +91,16 @@ function HomePage() {
                 <td colSpan={4} align="center" style={{ textAlign: "center" }}>
                   <button
                     data-type="load-more"
-                    onClick={() => setPage(page + 1)}
+                    onClick={() => {
+                      const nextPage = page + 1;
+                      setPage(nextPage);
+                      todoController
+                        .get({ page: nextPage })
+                        .then(({ todos, pages }) => {
+                          setTodos((oldTodos) => [...oldTodos, ...todos]);
+                          setTotalPages(pages);
+                        });
+                    }}
                   >
                     Página {page} Carregar mais{" "}
                     <span
