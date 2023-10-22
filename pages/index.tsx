@@ -9,18 +9,25 @@ interface HomeTodo {
 }
 function HomePage() {
   const [initialLoadComplete, setInitialLoadComplete] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
   const [totalPages, setTotalPages] = useState(0);
   const [page, setPage] = useState(1);
   const [todos, setTodos] = useState<HomeTodo[]>([]);
 
   const hasMorePages = totalPages > page;
+  const hasNoTodos = todos.length === 0 && !isLoading;
   useEffect(() => {
     setInitialLoadComplete(true);
     if (!initialLoadComplete) {
-      todoController.get({ page }).then(({ todos, pages }) => {
-        setTodos(todos);
-        setTotalPages(pages);
-      });
+      todoController
+        .get({ page })
+        .then(({ todos, pages }) => {
+          setTodos(todos);
+          setTotalPages(pages);
+        })
+        .finally(() => {
+          setIsLoading(false);
+        });
     }
   }, []);
 
@@ -74,17 +81,21 @@ function HomePage() {
               </tr>
             ))}
 
-            {/* <tr>
-              <td colSpan={4} align="center" style={{ textAlign: "center" }}>
-                Carregando...
-              </td>
-            </tr>
+            {isLoading && (
+              <tr>
+                <td colSpan={4} align="center" style={{ textAlign: "center" }}>
+                  Carregando...
+                </td>
+              </tr>
+            )}
 
-            <tr>
-              <td colSpan={4} align="center">
-                Nenhum item encontrado
-              </td>
-            </tr> */}
+            {hasNoTodos && (
+              <tr>
+                <td colSpan={4} align="center">
+                  Nenhum item encontrado
+                </td>
+              </tr>
+            )}
 
             {hasMorePages && (
               <tr>
@@ -92,6 +103,7 @@ function HomePage() {
                   <button
                     data-type="load-more"
                     onClick={() => {
+                      setIsLoading(true);
                       const nextPage = page + 1;
                       setPage(nextPage);
                       todoController
@@ -99,6 +111,9 @@ function HomePage() {
                         .then(({ todos, pages }) => {
                           setTodos((oldTodos) => [...oldTodos, ...todos]);
                           setTotalPages(pages);
+                        })
+                        .finally(() => {
+                          setIsLoading(false);
                         });
                     }}
                   >
