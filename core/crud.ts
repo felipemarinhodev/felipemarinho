@@ -12,7 +12,7 @@ interface Todo {
   done: boolean;
 }
 
-function create(content: string): Todo {
+export function create(content: string): Todo {
   const todo: Todo = {
     id: uuid(),
     date: new Date().toISOString(),
@@ -31,7 +31,7 @@ function saveInDB(todos: Todo[]) {
   fs.writeFileSync(DB_FILE_PATH, JSON.stringify({ todos }, null, 2));
 }
 
-function read(): Array<Todo> {
+export function read(): Array<Todo> {
   const dbString = fs.readFileSync(DB_FILE_PATH, "utf-8");
   const db = JSON.parse(dbString || "{}");
   if (!db.todos) {
@@ -73,12 +73,3 @@ function deleteById(id: UUID) {
 function CLEAR_DB() {
   fs.writeFileSync(DB_FILE_PATH, "");
 }
-
-// [SIMULATIONS]
-CLEAR_DB();
-const secondTodo = create("Segunda TODO");
-const thirdTodo = create("Segunda TODO");
-updateContentById(thirdTodo.id, "Terceira Todo");
-updateDoneById(thirdTodo.id, true);
-
-deleteById(secondTodo.id);
