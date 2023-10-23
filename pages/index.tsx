@@ -1,6 +1,6 @@
 import { todoController } from "@ui/controller/todo";
 import { GlobalStyles } from "@ui/theme/GlobalStyles";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 const bg = "https://mariosouto.com/cursos/crudcomqualidade/bg";
 
 interface HomeTodo {
@@ -8,7 +8,7 @@ interface HomeTodo {
   content: string;
 }
 function HomePage() {
-  const [initialLoadComplete, setInitialLoadComplete] = useState(false);
+  const initialLoadComplete = useRef(false);
   const [isLoading, setIsLoading] = useState(true);
   const [totalPages, setTotalPages] = useState(0);
   const [page, setPage] = useState(1);
@@ -21,8 +21,7 @@ function HomePage() {
   const hasMorePages = totalPages > page;
   const hasNoTodos = homeTodos.length === 0 && !isLoading;
   useEffect(() => {
-    setInitialLoadComplete(true);
-    if (!initialLoadComplete) {
+    if (!initialLoadComplete.current) {
       todoController
         .get({ page })
         .then(({ todos, pages }) => {
@@ -31,6 +30,7 @@ function HomePage() {
         })
         .finally(() => {
           setIsLoading(false);
+          initialLoadComplete.current = true;
         });
     }
   }, []);
