@@ -11,6 +11,18 @@ async function get({ page }: TodoControllerGetParams) {
   });
 }
 
+function filterTodosByContent<Todo>(
+  todos: Array<Todo & { content: string }>,
+  search: string
+): Todo[] {
+  return todos.filter((todo) => {
+    const searchNormalized = search.toLocaleLowerCase();
+    const contentNormalized = todo.content.toLocaleLowerCase();
+    return contentNormalized.includes(searchNormalized);
+  });
+}
+
 export const todoController = {
   get,
+  filterTodosByContent,
 };
