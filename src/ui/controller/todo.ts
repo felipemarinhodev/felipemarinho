@@ -1,5 +1,6 @@
 import { todoRepository } from "@ui/repository/todo";
 import { Todo } from "@ui/schema/todo";
+import { z as schema } from "zod";
 
 interface TodoControllerGetParams {
   page: number;
@@ -33,13 +34,14 @@ async function create({
   onError,
   onSuccess,
 }: TodoControllerCreateParams) {
-  if (!content) {
+  const parsedParams = schema.string().min(3).safeParse(content);
+  if (!parsedParams.success) {
     onError();
     return;
   }
 
   todoRepository
-    .createByContent(content)
+    .createByContent(parsedParams.data)
     .then((newTodo) => {
       onSuccess(newTodo);
     })
