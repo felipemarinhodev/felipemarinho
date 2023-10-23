@@ -60,7 +60,7 @@ function update(id: UUID, partialTodo: Partial<Todo>) {
 function updateContentById(id: UUID, content: string) {
   return update(id, { content });
 }
-function updateDoneById(id: UUID, done: boolean) {
+export function updateDoneById(id: UUID, done: boolean) {
   return update(id, { done });
 }
 
