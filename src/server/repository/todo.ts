@@ -1,4 +1,4 @@
-import { read } from "@db-crud-todo";
+import { create, read } from "@db-crud-todo";
 
 interface TodoRepositoryGetParams {
   page?: number;
@@ -23,7 +23,7 @@ function get({
   page = 1,
   limit = 2,
 }: TodoRepositoryGetParams = {}): TodoRepositoryGetOutput {
-  const ALL_TODOS = read();
+  const ALL_TODOS = read().reverse();
 
   const startIndex = (page - 1) * limit;
   const endIndex = page * limit;
@@ -33,6 +33,12 @@ function get({
   return { todos: paginatedTodos, total: ALL_TODOS.length, pages: totalPages };
 }
 
+async function createByContent(content: string): Promise<Todo> {
+  const newTodo = create(content);
+  return newTodo;
+}
+
 export const todoRepository = {
   get,
+  createByContent,
 };
