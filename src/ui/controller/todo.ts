@@ -22,7 +22,32 @@ function filterTodosByContent<Todo>(
   });
 }
 
+interface TodoControllerCreateParams {
+  content?: string;
+  onSuccess: (todo: any) => void;
+  onError: () => void;
+}
+async function create({
+  content,
+  onError,
+  onSuccess,
+}: TodoControllerCreateParams) {
+  if (!content) {
+    onError();
+    return;
+  }
+
+  const todo = {
+    id: "xpto",
+    content,
+    date: new Date(),
+    done: false,
+  };
+  onSuccess(todo);
+}
+
 export const todoController = {
   get,
   filterTodosByContent,
+  create,
 };
