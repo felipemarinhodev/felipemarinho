@@ -9,6 +9,9 @@ export default function handler(
     case "GET":
       todoController.get(request, response);
       break;
+    case "POST":
+      todoController.create(request, response);
+      break;
 
     default:
       response.status(405).json({
