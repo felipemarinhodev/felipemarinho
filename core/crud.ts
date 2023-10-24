@@ -64,7 +64,7 @@ export function updateDoneById(id: UUID, done: boolean) {
   return update(id, { done });
 }
 
-function deleteById(id: UUID) {
+export function deleteById(id: UUID) {
   const todos = read();
   const todosWithoutOne = todos.filter((todo) => todo.id !== id);
   saveInDB(todosWithoutOne);
