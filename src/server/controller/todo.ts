@@ -1,3 +1,4 @@
+import { HttpNotFoundError } from "@server/infra/errors";
 import { todoRepository } from "@server/repository/todo";
 import { NextApiRequest, NextApiResponse } from "next";
 import { z as schema } from "zod";
@@ -78,8 +79,40 @@ async function toggleDone(request: NextApiRequest, response: NextApiResponse) {
   }
 }
 
+async function deleteById(request: NextApiRequest, response: NextApiResponse) {
+  const todoId = schema.string().uuid().min(36).safeParse(request.query.id);
+  if (!todoId.success) {
+    response.status(400).json({
+      error: {
+        message: "You must to provide a valid ID",
+      },
+    });
+    return;
+  }
+  try {
+    await todoRepository.deleteById(todoId.data);
+    response.status(204).end();
+  } catch (error) {
+    if (error instanceof HttpNotFoundError) {
+      response.status(error.status).json({
+        error: {
+          message: error.message,
+        },
+      });
+    }
+    if (error instanceof Error) {
+      response.status(500).json({
+        error: {
+          message: `Internal server error`,
+        },
+      });
+    }
+  }
+}
+
 export const todoController = {
   get,
   create,
+  deleteById,
   toggleDone,
 };
