@@ -72,8 +72,19 @@ async function toggleDone(id: string): Promise<Todo> {
   throw new Error("Server Error");
 }
 
+async function deleteById(id: string): Promise<void> {
+  const response = await fetch(`/api/todos/${id}`, {
+    method: "DELETE",
+  });
+
+  if (!response.ok) {
+    throw new Error("Failed to delete");
+  }
+}
+
 export const todoRepository = {
   createByContent,
+  deleteById,
   get,
   toggleDone,
 };
