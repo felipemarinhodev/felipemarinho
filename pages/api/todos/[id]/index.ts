@@ -1,18 +1,13 @@
-import { NextApiRequest, NextApiResponse } from "next";
 import { todoController } from "@server/controller/todo";
-
+import { NextApiRequest, NextApiResponse } from "next";
 export default function handler(
   request: NextApiRequest,
   response: NextApiResponse
 ) {
   switch (request.method) {
-    case "GET":
-      todoController.get(request, response);
+    case "DELETE":
+      todoController.deleteById(request, response);
       break;
-    case "POST":
-      todoController.create(request, response);
-      break;
-
     default:
       response.status(405).json({
         error: {

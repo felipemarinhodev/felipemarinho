@@ -60,11 +60,11 @@ function update(id: UUID, partialTodo: Partial<Todo>) {
 function updateContentById(id: UUID, content: string) {
   return update(id, { content });
 }
-function updateDoneById(id: UUID, done: boolean) {
+export function updateDoneById(id: UUID, done: boolean) {
   return update(id, { done });
 }
 
-function deleteById(id: UUID) {
+export function deleteById(id: UUID) {
   const todos = read();
   const todosWithoutOne = todos.filter((todo) => todo.id !== id);
   saveInDB(todosWithoutOne);

@@ -47,9 +47,38 @@ async function create({
     })
     .catch(() => onError());
 }
+interface TodoControllerToggleDoneParams {
+  id: string;
+  updateTodoOnScreen: () => void;
+  onError: () => void;
+}
+async function toggleDone({
+  id,
+  onError,
+  updateTodoOnScreen,
+}: TodoControllerToggleDoneParams) {
+  try {
+    // Optimistic Update
+    // updateTodoOnScreen();
+    todoRepository.toggleDone(id).then(() => {
+      // Update real
+      updateTodoOnScreen();
+    });
+  } catch (error) {
+    if (error instanceof Error) {
+      onError();
+    }
+  }
+}
+
+async function deleteById(id: string): Promise<void> {
+  await todoRepository.deleteById(id);
+}
 
 export const todoController = {
-  get,
-  filterTodosByContent,
   create,
+  deleteById,
+  filterTodosByContent,
+  get,
+  toggleDone,
 };
