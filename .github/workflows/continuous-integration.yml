@@ -1,0 +1,13 @@
+name: "[CI] Continuous Integration"
+
+# Whenever a PR is created, or a commit is pushed
+on:
+  pull_request: 
+    types: [opened, synchronize]
+
+jobs:
+  lint:
+    runs-on: ubuntu-latest
+    steps:
+      - name: "Lint"
+        run: "echo 'alo alo w brazil'"
