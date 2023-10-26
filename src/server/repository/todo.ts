@@ -79,12 +79,10 @@ async function toggleDone(id: string): Promise<Todo> {
 }
 
 async function deleteById(id: string) {
-  const ALL_TODOS = read();
-  const todo = ALL_TODOS.find((todo) => todo.id === id);
-  if (!todo) {
-    throw new Error(`Todo with id: "${id}" not found.`);
-  }
-  await dbDeleteById(id);
+  const { error } = await supabase.from("todos").delete().match({
+    id,
+  });
+  if (error) throw new Error(`Todo with id: "${id}" not found.`);
 }
 
 export const todoRepository = {
