@@ -32,7 +32,8 @@ async function get({
   const { data, error, count } = await supabase
     .from("todos")
     .select("*", { count: "exact" })
-    .range(startIndex, endIndex);
+    .range(startIndex, endIndex)
+    .order("date", { ascending: false });
   if (error) throw new Error("Failed to fetch data");
 
   const parsedData = TodoSchema.array().safeParse(data);
