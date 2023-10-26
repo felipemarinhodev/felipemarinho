@@ -26,7 +26,7 @@ async function get(request: NextApiRequest, response: NextApiResponse) {
     return;
   }
 
-  const output = todoRepository.get({ page, limit });
+  const output = await todoRepository.get({ page, limit });
   const { total, pages, todos } = output;
   response.status(200).json({ total, pages, todos });
 }
