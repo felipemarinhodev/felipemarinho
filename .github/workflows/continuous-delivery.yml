@@ -1,12 +1,9 @@
 name: "[CD] Continuous Delivery"
 
 # Whenever a PR or a commit to main branch
-# on:
-#   push:
-#     branches: [main]
 on:
-  pull_request:
-    types: [opened, synchronize]
+  push:
+    branches: [main]
 
 env:
   VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
