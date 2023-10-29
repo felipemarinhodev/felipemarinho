@@ -18,7 +18,7 @@ async function get({
 }: TodoRepositoryGetParams = {}): Promise<TodoRepositoryGetOutput> {
   const startIndex = (page - 1) * limit;
   const endIndex = page * limit - 1;
-  const { data, error, count } = await supabase
+  const { data, error, count } = await supabase()
     .from("todos")
     .select("*", { count: "exact" })
     .range(startIndex, endIndex)
@@ -41,7 +41,7 @@ async function get({
 }
 
 async function createByContent(content: string): Promise<Todo> {
-  const { data, error } = await supabase
+  const { data, error } = await supabase()
     .from("todos")
     .insert([
       {
@@ -58,7 +58,7 @@ async function createByContent(content: string): Promise<Todo> {
 }
 
 async function getTodoById(id: string): Promise<Todo> {
-  const { data, error } = await supabase
+  const { data, error } = await supabase()
     .from("todos")
     .select("*")
     .eq("id", id)
@@ -71,7 +71,7 @@ async function getTodoById(id: string): Promise<Todo> {
 
 async function toggleDone(id: string): Promise<Todo> {
   const todo = await getTodoById(id);
-  const { data, error } = await supabase
+  const { data, error } = await supabase()
     .from("todos")
     .update({
       done: !todo.done,
@@ -85,7 +85,7 @@ async function toggleDone(id: string): Promise<Todo> {
 }
 
 async function deleteById(id: string) {
-  const { error } = await supabase.from("todos").delete().match({
+  const { error } = await supabase().from("todos").delete().match({
     id,
   });
   if (error) throw new Error(`Todo with id: "${id}" not found.`);
