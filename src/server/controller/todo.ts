@@ -45,11 +45,12 @@ async function get(request: Request) {
     return handleResponse(response, ResponseTypes.OK);
   } catch (error) {
     const response = {
-        error: {
-          message: "Failed to fetch TODOs",
-        },
-      };
+      error: {
+        message: "Failed to fetch TODOs",
+      },
+    };
     return handleResponse(response, ResponseTypes.BAD_REQUEST);
+  }
 }
 
 const TodoCreateBodySchema = schema.object({
