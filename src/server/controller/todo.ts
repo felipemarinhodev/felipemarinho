@@ -1,7 +1,15 @@
 import { HttpNotFoundError } from "@server/infra/errors";
 import { todoRepository } from "@server/repository/todo";
-import { NextApiRequest, NextApiResponse } from "next";
 import { z as schema } from "zod";
+
+enum ResponseTypes {
+  OK = 200,
+  CREATED = 201,
+  NO_CONTENT = 204,
+  BAD_REQUEST = 400,
+  NOT_FOUND = 404,
+  INTERNAL_SERVER_ERROR = 500,
+}
 
 async function get(request: Request) {
   const { searchParams } = new URL(request.url);
@@ -13,36 +21,27 @@ async function get(request: Request) {
   const limit = Number(query.limit);
 
   if (query.page && isNaN(page)) {
-    return new Response(
-      JSON.stringify({
-        error: {
-          message: "`page` must be a number",
-        },
-      }),
-      {
-        status: 400,
-      }
-    );
+    const response = {
+      error: {
+        message: "`page` must be a number",
+      },
+    };
+    return handleResponse(response, ResponseTypes.BAD_REQUEST);
   }
 
   if (query.limit && isNaN(limit)) {
-    return new Response(
-      JSON.stringify({
-        error: {
-          message: "`limit` must be a number",
-        },
-      }),
-      {
-        status: 400,
-      }
-    );
+    const response = {
+      error: {
+        message: "`limit` must be a number",
+      },
+    };
+    return handleResponse(response, ResponseTypes.BAD_REQUEST);
   }
 
   const output = await todoRepository.get({ page, limit });
   const { total, pages, todos } = output;
-  return new Response(JSON.stringify({ total, pages, todos }), {
-    status: 200,
-  });
+  const response = { total, pages, todos };
+  return handleResponse(response, ResponseTypes.OK);
 }
 
 const TodoCreateBodySchema = schema.object({
@@ -52,92 +51,77 @@ const TodoCreateBodySchema = schema.object({
 async function create(request: Request) {
   const body = TodoCreateBodySchema.safeParse(await request.json());
   if (!body.success) {
-    return new Response(
-      JSON.stringify({
-        error: {
-          message: "You need to provide a content to create a TODO",
-          description: body.error.issues,
-        },
-      }),
-      { status: 400 }
-    );
+    const response = {
+      error: {
+        message: "You need to provide a content to create a TODO",
+        description: body.error.issues,
+      },
+    };
+    return handleResponse(response, ResponseTypes.BAD_REQUEST);
   }
   try {
     const createTodo = await todoRepository.createByContent(body.data.content);
-    return new Response(
-      JSON.stringify({
-        todo: createTodo,
-      }),
-      { status: 201 }
-    );
+    const response = { todo: createTodo };
+    return handleResponse(response, ResponseTypes.CREATED);
   } catch (error) {
-    return new Response(
-      JSON.stringify({
-        error: {
-          message: "Failed to create todo",
-        },
-      }),
-      { status: 400 }
-    );
+    const response = {
+      error: { message: "Failed to create todo" },
+    };
+    return handleResponse(response, ResponseTypes.BAD_REQUEST);
   }
 }
 
-async function toggleDone(request: NextApiRequest, response: NextApiResponse) {
-  const todoId = schema.string().uuid().safeParse(request.query.id);
+async function toggleDone(id: string) {
+  const todoId = schema.string().uuid().safeParse(id);
   if (!todoId.success) {
-    response.status(400).json({
+    const response = {
       error: {
         message: "You must to provide a string ID",
+        description: todoId.error,
       },
-    });
-    return;
+    };
+    return handleResponse(response, ResponseTypes.BAD_REQUEST);
   }
+
   try {
     const updatedTodo = await todoRepository.toggleDone(todoId.data);
-
-    response.status(200).json({
-      todo: updatedTodo,
-    });
+    const response = { todo: updatedTodo };
+    return handleResponse(response, 200);
   } catch (error) {
     if (error instanceof Error) {
-      response.status(404).json({
-        error: {
-          message: error.message,
-        },
-      });
+      const response = { error: { message: error.message } };
+      return handleResponse(response, ResponseTypes.NOT_FOUND);
     }
   }
 }
 
-async function deleteById(request: NextApiRequest, response: NextApiResponse) {
-  const todoId = schema.string().uuid().min(36).safeParse(request.query.id);
+async function deleteById(id: string) {
+  const todoId = schema.string().uuid().min(36).safeParse(id);
   if (!todoId.success) {
-    response.status(400).json({
-      error: {
-        message: "You must to provide a valid ID",
-      },
-    });
-    return;
+    const response = {
+      error: { message: "You must to provide a valid ID" },
+    };
+    return handleResponse(response, ResponseTypes.BAD_REQUEST);
   }
   try {
     await todoRepository.deleteById(todoId.data);
-    response.status(204).end();
+    return new Response(null, { status: 204 });
   } catch (error) {
     if (error instanceof HttpNotFoundError) {
-      response.status(error.status).json({
-        error: {
-          message: error.message,
-        },
-      });
+      return handleResponse(
+        { error: { message: error.message } },
+        error.status
+      );
     }
     if (error instanceof Error) {
-      response.status(500).json({
-        error: {
-          message: `Internal server error`,
-        },
-      });
+      const response = { error: { message: `Internal server error` } };
+      return handleResponse(response, 500);
     }
   }
+}
+
+function handleResponse(response: unknown, status: number) {
+  return new Response(JSON.stringify(response), { status });
 }
 
 export const todoController = {
