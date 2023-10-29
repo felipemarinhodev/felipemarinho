@@ -38,11 +38,24 @@ async function get(request: Request) {
     );
   }
 
-  const output = await todoRepository.get({ page, limit });
-  const { total, pages, todos } = output;
-  return new Response(JSON.stringify({ total, pages, todos }), {
-    status: 200,
-  });
+  try {
+    const output = await todoRepository.get({ page, limit });
+    const { total, pages, todos } = output;
+    return new Response(JSON.stringify({ total, pages, todos }), {
+      status: 200,
+    });
+  } catch (error) {
+    return new Response(
+      JSON.stringify({
+        error: {
+          message: "Failed to fetch TODOs",
+        },
+      }),
+      {
+        status: 400,
+      }
+    );
+  }
 }
 
 const TodoCreateBodySchema = schema.object({
